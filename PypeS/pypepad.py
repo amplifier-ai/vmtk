@@ -296,7 +296,7 @@ class PypeTkPad(object):
                 for member in members:
                     optionlist.append('-'+member.OptionName)
                 list = [option for option in optionlist if option.count(word)]
-            except:
+            except Exception:
                 return list
         else:
             list = [scriptname for scriptname in vmtkscripts.__all__ if scriptname.count(word)]

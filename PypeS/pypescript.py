@@ -201,14 +201,14 @@ class pypeScript(object):
         self.OutputText(prompt)
         try:
             self.InputStream.prompt(prompt,info=True)
-        except:
+        except Exception:
             pass
 
     def InputText(self,prompt='',validator=None):
         self.OutputText(prompt)
         try:
             self.InputStream.prompt(prompt)
-        except:
+        except Exception:
             pass
         text = self.InputStream.readline()
         if text:
@@ -218,7 +218,7 @@ class pypeScript(object):
                 self.OutputText(prompt)
                 try:
                     self.InputStream.prompt(prompt,info=False)
-                except:
+                except Exception:
                     pass
                 text = self.InputStream.readline()
                 if text:

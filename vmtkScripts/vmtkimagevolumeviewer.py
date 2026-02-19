@@ -128,12 +128,7 @@ class vmtkImageVolumeViewer(pypes.pypeScript):
 
         def _chunks(l, n):
             """Yield successive n-sized chunks from l."""
-            PY3 = sys.version_info[0] == 3
-            if PY3:
-                range_func = range
-            else:
-                range_func = xrange
-            for i in range_func(0, len(l), n):
+            for i in range(0, len(l), n):
                 yield l[i:i + n]
 
         # need to convert the space seperated string displaying values into a list of floats
@@ -236,9 +231,6 @@ class vmtkImageVolumeViewer(pypes.pypeScript):
 
     def BuildView(self):
 
-        # ensure python 2-3 compatibility for checking string type (difference with unicode str handeling)
-        PY3 = sys.version_info[0] == 3
-
         if not self.vmtkRenderer:
             self.vmtkRenderer = vmtkrenderer.vmtkRenderer()
             self.vmtkRenderer.Initialize()
@@ -249,11 +241,7 @@ class vmtkImageVolumeViewer(pypes.pypeScript):
         if (self.ArrayName != ''):
             self.Image.GetPointData().SetActiveScalars(self.ArrayName)
 
-        if PY3:
-            string_types = str,
-        else:
-            string_types = basestring,
-        if not isinstance(self.VolumeRenderingMethod, string_types):
+        if not isinstance(self.VolumeRenderingMethod, str):
             self.PrintError('Specified Rendering Method is not of required "string" type')
 
         # create volume mapper and apply requested volume rendering method

@@ -59,8 +59,8 @@ if( NOT USE_SYSTEM_ITK )
 
   set(ITK_GIT_REPOSITORY "https://github.com/Kitware/ITK.git")
   if (VMTK_USE_ITK5)
-    set(ITK_GIT_TAG "v5.2.1")
-    set( ITK_VERSION 5.2 )
+    set(ITK_GIT_TAG "v5.4.5")
+    set( ITK_VERSION 5.4 )
     list(APPEND ITK_EXTERNAL_PROJECT_OPTIONAL_CMAKE_ARGS
       -DITK_LEGACY_REMOVE:BOOL=OFF   #<-- Allow LEGACY ITKv4 features for now.
       -DITK_LEGACY_SILENT:BOOL=OFF   #<-- Use of legacy code will produce compiler warnings
@@ -124,8 +124,8 @@ if( NOT USE_SYSTEM_VTK )
 
   set(VTK_GIT_REPOSITORY "https://github.com/Kitware/VTK.git")
   if (VMTK_USE_VTK9)
-    set(VTK_GIT_TAG "v9.1.0")
-    set( VTK_VERSION 9.0 )
+    set(VTK_GIT_TAG "v9.5.2")
+    set( VTK_VERSION 9.5 )
     set(VTK_EXTERNAL_PROJECT_OPTIONAL_CMAKE_ARGS
       -DPython${PYTHON_VERSION_MAJOR}_EXECUTABLE:FILEPATH=${PYTHON_EXECUTABLE}
       -DPython${PYTHON_VERSION_MAJOR}_INCLUDE_DIR:PATH=${PYTHON_INCLUDE_DIR}

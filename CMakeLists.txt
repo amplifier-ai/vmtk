@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.12...3.29.1)
+cmake_minimum_required(VERSION 3.16...3.31)
 
 project(VMTK)
 
@@ -167,7 +167,7 @@ if( VMTK_USE_SUPERBUILD )
     option ( VMTK_BUILD_STREAMTRACER "Build static temporal stream tracer." ON )
     if (APPLE)
       option ( VTK_VMTK_USE_COCOA "Build with Cocoa support." ON )
-      set ( CMAKE_OSX_ARCHITECTURES "x86_64" CACHE STRING "" FORCE )
+      set ( CMAKE_OSX_ARCHITECTURES "arm64" CACHE STRING "" FORCE )
     endif ()
     set ( CMAKE_BUILD_TYPE "Release" CACHE STRING "" FORCE )
     option ( BUILD_SHARED_LIBS "Build shared libraries." ON )
