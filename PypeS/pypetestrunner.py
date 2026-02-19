@@ -40,7 +40,7 @@ class PypeTestResult(unittest.TestResult):
     def appendLogLine(self,logline):
         try:
             self.ResultList.append(logline)
-        except:
+        except Exception:
             self.ResultList = []
             self.ResultList.append(logline)
 

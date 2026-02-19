@@ -96,15 +96,7 @@ class vmtkImageSmoothing(pypes.pypeScript):
         if self.Image == None:
             self.PrintError('Error: No input image.')
 
-        # need to ensure that self.Method variable is a "string"
-        # in order to ensure unicode compatibility in python 2 and 3, we check what python version is running,
-        # and assign 'str' type if Py3, and 'basestring' type if Py2
-        try:
-            basestring
-        except NameError:
-            basestring = str
-
-        if not isinstance(self.Method, basestring):
+        if not isinstance(self.Method, str):
             self.PrintError('Method Selected (', self.Method, ') is not string type')
 
         if self.Method.lower() == 'gauss':
