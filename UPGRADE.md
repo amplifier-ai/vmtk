@@ -25,7 +25,7 @@ Build with `USE_SYSTEM_VTK=ON` and `USE_SYSTEM_ITK=ON` using system/conda packag
 
 ## 2. Files to Modify
 
-### 2.1. SuperBuild.cmake — dependency versions
+### 2.1. SuperBuild.cmake — dependency versions and Python3 variables
 
 **VTK** (line 127):
 ```cmake
@@ -42,6 +42,13 @@ set(ITK_GIT_TAG "v5.2.1")
 # NEW (5.4.5 latest stable, VMTK already has fixes for 5.4):
 set(ITK_GIT_TAG "v5.4.5")
 ```
+
+**Remove deprecated VTK_PYTHON_VERSION** — VTK 9.5 only supports Python 3,
+passing this variable causes a FATAL_ERROR. Remove `-DVTK_PYTHON_VERSION=...` from VTK ExternalProject.
+
+**Fix Python variable names** — `find_package(Python3)` sets `Python3_EXECUTABLE`,
+`Python3_INCLUDE_DIRS`, `Python3_LIBRARIES` (not the old `PYTHON_EXECUTABLE`, `PYTHON_INCLUDE_DIR`, etc.).
+All VTK and VMTK ExternalProject `-DPython...` args must use `Python3_*` variables.
 
 ### 2.2. CMake/CMakeLists.txt — vtkAddon version
 
