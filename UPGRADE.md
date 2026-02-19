@@ -215,13 +215,31 @@ cmake --build . -j$(nproc)
 
 ---
 
-## 6. Priority Order
+## 6. Test Results (Python 3.13.9, macOS arm64)
 
-1. **[CRITICAL]** Update VTK to 9.4+/9.5 (or use system VTK)
-2. **[CRITICAL]** Update ITK to 5.4+ (or use system ITK)
+All tests pass when run individually (58 test files, ~560 tests):
+
+| Suite | Result |
+|---|---|
+| PypeS (9 tests) | **8 passed, 1 xfail** |
+| vmtkScripts imports | **passed** (1 expected fail: `vtkvmtkStaticTemporalStreamTracer` — stream tracer disabled) |
+| vmtkScripts (58 files) | **All OK** |
+
+> **Note:** Running all tests in a single pytest session can cause segfaults due to
+> VTK state leaking between test modules. Running each file individually avoids this.
+
+---
+
+## 7. Completed Changes
+
+1. ~~**[CRITICAL]** Update VTK to 9.5.2~~ — **done**
+2. ~~**[CRITICAL]** Update ITK to 5.4.5~~ — **done**
 3. ~~**[CRITICAL]** Update vtkAddon CMake wrapping scripts~~ — **not needed**, already up to date
-4. **[MEDIUM]** Fix Python 2 remnants (xrange, basestring)
-5. **[MEDIUM]** Update conda build config
-6. **[LOW]** Clean up bare except clauses
-7. **[LOW]** Remove __future__ imports
-8. **[LOW]** Fix macOS architecture for Apple Silicon
+4. ~~**[MEDIUM]** Fix Python 2 remnants (xrange, basestring)~~ — **done**
+5. ~~**[MEDIUM]** Update conda build config~~ — **done**
+6. ~~**[LOW]** Clean up bare except clauses~~ — **done**
+7. ~~**[LOW]** Remove __future__ imports~~ — **done**
+8. ~~**[LOW]** Fix macOS architecture for Apple Silicon~~ — **done**
+9. ~~**[CRITICAL]** Fix Python3 CMake variable names in SuperBuild~~ — **done**
+10. ~~**[CRITICAL]** Remove deprecated VTK_PYTHON_VERSION~~ — **done**
+11. ~~**[CRITICAL]** Fix vtkThreshold API for VTK 9.5~~ — **done**
