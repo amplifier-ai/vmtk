@@ -155,10 +155,11 @@ jobs:
           retention-days: 30
 
       - name: Test wheel
+        shell: bash
         run: |
           pip install dist/*.whl
-          # Run from /tmp to avoid local vmtk.py shadowing installed package
-          cd /tmp
+          # Run from temp dir to avoid local vmtk.py shadowing installed package
+          cd "$RUNNER_TEMP"
           python -c "from vmtk import vtkvmtk; print('vtkvmtk imported OK')"
           python -c "import vtk; print('VTK', vtk.vtkVersion.GetVTKVersion())"
 
