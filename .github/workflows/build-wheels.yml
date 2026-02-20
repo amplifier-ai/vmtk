@@ -124,7 +124,7 @@ jobs:
             -DVMTK_BUILD_TETGEN=ON ^
             -DVMTK_USE_RENDERING=ON ^
             -DVMTK_WITH_LIBRARY_VERSION=OFF
-          cmake --build build --config Release
+          cmake --build build --config Release --parallel
 
       - name: Build wheel
         env:
