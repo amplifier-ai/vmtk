@@ -1,0 +1,176 @@
+name: Build Wheels
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+
+env:
+  VMTK_VERSION: "1.6.0"
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: macos-14
+            cmake_generator: Ninja
+            cmake_extra: >-
+              -DVTK_VMTK_USE_COCOA=ON
+              -DCMAKE_OSX_ARCHITECTURES=arm64
+              -DCMAKE_OSX_DEPLOYMENT_TARGET=11.0
+          - os: ubuntu-22.04
+            cmake_generator: Ninja
+            cmake_extra: -DVTK_USE_X=ON
+          - os: windows-2022
+            cmake_generator: Visual Studio 17 2022
+            cmake_extra: -A x64
+
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 120
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      - name: Setup MSVC (Windows)
+        if: runner.os == 'Windows'
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: x64
+
+      - name: Install system deps (macOS)
+        if: runner.os == 'macOS'
+        run: brew install ninja
+
+      - name: Install system deps (Linux)
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            cmake ninja-build \
+            libgl1-mesa-dev libglu1-mesa-dev \
+            libx11-dev libxt-dev libxext-dev \
+            libxrender-dev libxcursor-dev \
+            libxrandr-dev libxinerama-dev libxi-dev \
+            patchelf
+
+      - name: Install Python build tools
+        run: pip install build wheel setuptools numpy
+
+      - name: Cache VTK/ITK build
+        uses: actions/cache@v4
+        with:
+          path: |
+            build/VTK
+            build/VTK-Build
+            build/ITK
+            build/ITK-Build
+            build/Install/lib
+            build/Install/bin
+            build/Install/include
+            build/Install/share
+          key: superbuild-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('SuperBuild.cmake') }}
+          restore-keys: |
+            superbuild-${{ runner.os }}-${{ runner.arch }}-
+
+      - name: CMake configure + build (Unix)
+        if: runner.os != 'Windows'
+        env:
+          CMAKE_GENERATOR: ${{ matrix.cmake_generator }}
+          CMAKE_EXTRA: ${{ matrix.cmake_extra }}
+        run: |
+          cmake -S . -B build \
+            -G "$CMAKE_GENERATOR" \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DBUILD_SHARED_LIBS=ON \
+            -DVMTK_USE_SUPERBUILD=ON \
+            -DVMTK_USE_VTK9=ON \
+            -DVMTK_USE_ITK5=ON \
+            -DVTK_VMTK_WRAP_PYTHON=ON \
+            -DVMTK_SCRIPTS_ENABLED=ON \
+            -DVMTK_CONTRIB_SCRIPTS=ON \
+            -DVTK_VMTK_CONTRIB=ON \
+            -DVMTK_BUILD_TETGEN=ON \
+            -DVMTK_USE_RENDERING=ON \
+            -DVMTK_WITH_LIBRARY_VERSION=OFF \
+            $CMAKE_EXTRA
+          cmake --build build --config Release
+
+      - name: CMake configure + build (Windows)
+        if: runner.os == 'Windows'
+        env:
+          CMAKE_GENERATOR: ${{ matrix.cmake_generator }}
+          CMAKE_EXTRA: ${{ matrix.cmake_extra }}
+        shell: cmd
+        run: |
+          cmake -S . -B build ^
+            -G "%CMAKE_GENERATOR%" ^
+            %CMAKE_EXTRA% ^
+            -DCMAKE_BUILD_TYPE=Release ^
+            -DBUILD_SHARED_LIBS=ON ^
+            -DVMTK_USE_SUPERBUILD=ON ^
+            -DVMTK_USE_VTK9=ON ^
+            -DVMTK_USE_ITK5=ON ^
+            -DVTK_VMTK_WRAP_PYTHON=ON ^
+            -DVMTK_SCRIPTS_ENABLED=ON ^
+            -DVMTK_CONTRIB_SCRIPTS=ON ^
+            -DVTK_VMTK_CONTRIB=ON ^
+            -DVMTK_BUILD_TETGEN=ON ^
+            -DVMTK_USE_RENDERING=ON ^
+            -DVMTK_WITH_LIBRARY_VERSION=OFF
+          cmake --build build --config Release --parallel
+
+      - name: Build wheel
+        env:
+          WHEEL_VERSION: ${{ env.VMTK_VERSION }}
+        run: python build_wheel.py --install-dir build/Install --output-dir dist --version "$WHEEL_VERSION"
+
+      - name: Repair wheel for manylinux (Linux)
+        if: runner.os == 'Linux'
+        run: |
+          pip install auditwheel
+          auditwheel repair dist/*.whl \
+            --plat manylinux_2_28_x86_64 \
+            -w dist_repaired/
+          rm -rf dist
+          mv dist_repaired dist
+
+      - name: Upload wheel
+        uses: actions/upload-artifact@v4
+        with:
+          name: wheel-${{ matrix.os }}
+          path: dist/*.whl
+          retention-days: 30
+
+      - name: Test wheel
+        run: |
+          pip install dist/*.whl
+          python -c "from vmtk import vtkvmtk; print('vtkvmtk imported OK')"
+          python -c "import vtk; print('VTK', vtk.vtkVersion.GetVTKVersion())"
+
+  # Attach wheels to GitHub Release when a tag is pushed
+  release:
+    needs: build
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: wheel-*
+          merge-multiple: true
+          path: dist/
+
+      - name: List wheels
+        run: ls -lh dist/
+
+      - name: Upload wheels to GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/*.whl

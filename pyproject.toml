@@ -1,0 +1,53 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "amplifierai-vmtk"
+version = "1.6.0"
+description = "vmtk - the Vascular Modeling Toolkit"
+requires-python = ">=3.13"
+license = {file = "LICENSE"}
+dependencies = [
+    "numpy>=1.26",
+]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Science/Research",
+    "Operating System :: MacOS :: MacOS X",
+    "Operating System :: Microsoft :: Windows",
+    "Operating System :: POSIX :: Linux",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: C++",
+    "Topic :: Scientific/Engineering :: Medical Science Apps.",
+]
+
+[project.urls]
+Homepage = "https://www.vmtk.org"
+Repository = "https://github.com/amplifier-ai/vmtk"
+
+[project.scripts]
+vmtk = "vmtk.vmtk_main:main"
+
+[tool.setuptools.packages.find]
+include = ["vmtk*", "vtkmodules*"]
+
+[tool.setuptools.package-data]
+vmtk = [
+    "*.so",
+    "*.pyd",
+    ".dylibs/*.dylib",
+    ".libs/*.so",
+    ".libs/*.so.*",
+    ".libs/*.dll",
+    "share/*.xml",
+]
+vtkmodules = [
+    "*.so",
+    "*.pyd",
+    "**/*.so",
+    "**/*.pyd",
+]
+
+[tool.setuptools]
+py-modules = ["vtk"]
