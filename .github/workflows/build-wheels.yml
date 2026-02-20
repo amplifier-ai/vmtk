@@ -29,7 +29,7 @@ jobs:
             cmake_extra: -A x64
 
     runs-on: ${{ matrix.os }}
-    timeout-minutes: 120
+    timeout-minutes: 180
 
     steps:
       - uses: actions/checkout@v4
