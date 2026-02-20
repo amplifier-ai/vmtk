@@ -7,7 +7,7 @@ on:
 
 env:
   VMTK_VERSION: "1.6.0"
-  CMAKE_BUILD_PARALLEL_LEVEL: "4"
+  CMAKE_BUILD_PARALLEL_LEVEL: "8"
 
 jobs:
   build:
@@ -24,7 +24,7 @@ jobs:
           - os: ubuntu-22.04
             cmake_generator: Ninja
             cmake_extra: -DVTK_USE_X=ON
-          - os: windows-2022
+          - os: windows-latest-l
             cmake_generator: Visual Studio 17 2022
             cmake_extra: -A x64
 
