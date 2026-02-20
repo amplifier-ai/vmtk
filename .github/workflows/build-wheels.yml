@@ -7,6 +7,7 @@ on:
 
 env:
   VMTK_VERSION: "1.6.0"
+  CMAKE_BUILD_PARALLEL_LEVEL: "4"
 
 jobs:
   build:
@@ -123,7 +124,7 @@ jobs:
             -DVMTK_BUILD_TETGEN=ON ^
             -DVMTK_USE_RENDERING=ON ^
             -DVMTK_WITH_LIBRARY_VERSION=OFF
-          cmake --build build --config Release --parallel
+          cmake --build build --config Release
 
       - name: Build wheel
         env:
