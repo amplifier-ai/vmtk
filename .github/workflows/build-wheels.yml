@@ -24,7 +24,7 @@ jobs:
           - os: ubuntu-22.04
             cmake_generator: Ninja
             cmake_extra: -DVTK_USE_X=ON
-          - os: windows-latest-l
+          - os: windows-2022
             cmake_generator: Visual Studio 17 2022
             cmake_extra: -A x64
 
