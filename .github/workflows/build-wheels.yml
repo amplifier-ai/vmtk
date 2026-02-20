@@ -127,9 +127,7 @@ jobs:
           cmake --build build --config Release --parallel
 
       - name: Build wheel
-        env:
-          WHEEL_VERSION: ${{ env.VMTK_VERSION }}
-        run: python build_wheel.py --install-dir build/Install --output-dir dist --version "$WHEEL_VERSION"
+        run: python build_wheel.py --install-dir build/Install --output-dir dist --version ${{ env.VMTK_VERSION }}
 
       - name: Repair wheel for manylinux (Linux)
         if: runner.os == 'Linux'
