@@ -134,11 +134,19 @@ jobs:
         if: runner.os == 'Linux'
         run: |
           pip install auditwheel
-          auditwheel repair dist/*.whl \
-            --plat manylinux_2_28_x86_64 \
-            -w dist_repaired/
-          rm -rf dist
-          mv dist_repaired dist
+          # Detect the minimum manylinux tag this wheel supports
+          PLAT=$(auditwheel show dist/*.whl 2>&1 | grep -oP 'manylinux_\d+_\d+_x86_64' | head -1)
+          if [ -z "$PLAT" ]; then
+            echo "auditwheel show did not detect a manylinux platform, skipping repair"
+            echo "Wheel will keep linux_x86_64 tag"
+          else
+            echo "Repairing wheel for $PLAT"
+            auditwheel repair dist/*.whl \
+              --plat "$PLAT" \
+              -w dist_repaired/
+            rm -rf dist
+            mv dist_repaired dist
+          fi
 
       - name: Upload wheel
         uses: actions/upload-artifact@v4
@@ -150,6 +158,8 @@ jobs:
       - name: Test wheel
         run: |
           pip install dist/*.whl
+          # Run from /tmp to avoid local vmtk.py shadowing installed package
+          cd /tmp
           python -c "from vmtk import vtkvmtk; print('vtkvmtk imported OK')"
           python -c "import vtk; print('VTK', vtk.vtkVersion.GetVTKVersion())"
 
