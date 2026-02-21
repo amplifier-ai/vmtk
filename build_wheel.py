@@ -360,21 +360,20 @@ if __name__ == '__main__':
     print("  Created vmtk_main.py entry point")
 
 
-def _patch_init_for_dll_loading(vmtk_dir):
+def _patch_init_for_dll_loading(pkg_dir, libs_rel_path=".libs"):
     """On Windows, patch __init__.py to register DLL directory."""
-    init_path = vmtk_dir / "__init__.py"
+    init_path = pkg_dir / "__init__.py"
     existing = init_path.read_text() if init_path.exists() else ""
-    patch = """\
+    patch = f"""\
 import os as _os
 import sys as _sys
 if _sys.platform == 'win32':
-    _libs_dir = _os.path.join(_os.path.dirname(__file__), '.libs')
+    _libs_dir = _os.path.join(_os.path.dirname(__file__), {libs_rel_path!r})
     if _os.path.isdir(_libs_dir):
         _os.add_dll_directory(_libs_dir)
         _os.environ['PATH'] = _libs_dir + _os.pathsep + _os.environ.get('PATH', '')
 """
     init_path.write_text(patch + existing)
-    print("  Patched __init__.py for Windows DLL loading")
 
 
 def stage_vtk_package(install_dir, staging_dir):
@@ -390,6 +389,8 @@ def stage_vtk_package(install_dir, staging_dir):
     shutil.copy2(vtk_sp / "vtk.py", staging_dir / "vtk.py")
 
     vtkmod_dir = staging_dir / "vtkmodules"
+    if SYSTEM == "Windows":
+        _patch_init_for_dll_loading(vtkmod_dir, libs_rel_path=r"..\vmtk\.libs")
     n_mod = sum(1 for _ in vtkmod_dir.glob(f"*{mod_ext}"))
     n_py = sum(1 for _ in vtkmod_dir.rglob("*.py"))
     print(f"  Staged vtkmodules: {n_py} .py, {n_mod} {mod_ext} files")

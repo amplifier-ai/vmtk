@@ -63,8 +63,8 @@ jobs:
       - name: Install Python build tools
         run: pip install build wheel setuptools numpy
 
-      - name: Cache VTK/ITK build
-        uses: actions/cache@v4
+      - name: Restore VTK/ITK cache
+        uses: actions/cache/restore@v4
         with:
           path: |
             build/VTK
@@ -125,6 +125,21 @@ jobs:
             -DVMTK_USE_RENDERING=ON ^
             -DVMTK_WITH_LIBRARY_VERSION=OFF
           cmake --build build --config Release --parallel
+
+      - name: Save VTK/ITK cache
+        if: always()
+        uses: actions/cache/save@v4
+        with:
+          path: |
+            build/VTK
+            build/VTK-Build
+            build/ITK
+            build/ITK-Build
+            build/Install/lib
+            build/Install/bin
+            build/Install/include
+            build/Install/share
+          key: superbuild-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('SuperBuild.cmake') }}
 
       - name: Build wheel
         run: python build_wheel.py --install-dir build/Install --output-dir dist --version ${{ env.VMTK_VERSION }}
