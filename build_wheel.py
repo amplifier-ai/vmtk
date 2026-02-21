@@ -373,7 +373,30 @@ if _sys.platform == 'win32':
         _os.add_dll_directory(_libs_dir)
         _os.environ['PATH'] = _libs_dir + _os.pathsep + _os.environ.get('PATH', '')
 """
-    init_path.write_text(patch + existing)
+    # Insert after __future__ imports and docstrings to avoid SyntaxError
+    lines = existing.splitlines(keepends=True)
+    insert_pos = 0
+    in_docstring = False
+    for i, line in enumerate(lines):
+        stripped = line.strip()
+        if in_docstring:
+            insert_pos = i + 1
+            if '"""' in stripped or "'''" in stripped:
+                in_docstring = False
+            continue
+        if stripped.startswith('"""') or stripped.startswith("'''"):
+            insert_pos = i + 1
+            # Check if docstring opens and closes on same line (e.g. """text""")
+            quote = stripped[:3]
+            if stripped.count(quote) < 2:
+                in_docstring = True
+            continue
+        if stripped.startswith("from __future__") or stripped.startswith("#") or stripped == "":
+            insert_pos = i + 1
+        else:
+            break
+    patched = "".join(lines[:insert_pos]) + patch + "".join(lines[insert_pos:])
+    init_path.write_text(patched)
 
 
 def stage_vtk_package(install_dir, staging_dir):
