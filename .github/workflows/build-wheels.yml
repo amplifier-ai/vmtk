@@ -176,7 +176,7 @@ jobs:
           # Run from temp dir to avoid local vmtk.py shadowing installed package
           cd "$RUNNER_TEMP"
           python -c "from vmtk import vtkvmtk; print('vtkvmtk imported OK')"
-          python -c "import vtk; print('VTK', vtk.vtkVersion.GetVTKVersion())"
+          python -c "from vmtk import vtkvmtk; import vtk; print('VTK', vtk.vtkVersion.GetVTKVersion())"
 
   # Attach wheels to GitHub Release when a tag is pushed
   release:
