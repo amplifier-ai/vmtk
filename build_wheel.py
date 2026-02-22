@@ -412,8 +412,6 @@ def stage_vtk_package(install_dir, staging_dir):
     shutil.copy2(vtk_sp / "vtk.py", staging_dir / "vtk.py")
 
     vtkmod_dir = staging_dir / "vtkmodules"
-    if SYSTEM == "Windows":
-        _patch_init_for_dll_loading(vtkmod_dir, libs_rel_path=r"..\vmtk\.libs")
     n_mod = sum(1 for _ in vtkmod_dir.glob(f"*{mod_ext}"))
     n_py = sum(1 for _ in vtkmod_dir.rglob("*.py"))
     print(f"  Staged vtkmodules: {n_py} .py, {n_mod} {mod_ext} files")
